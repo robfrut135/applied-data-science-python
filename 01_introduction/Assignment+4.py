@@ -156,6 +156,9 @@ def convert_housing_data_to_quarters():
     The resulting dataframe should have 67 columns, and 10,730 rows.
     '''
     hd = pd.read_csv("City_Zhvi_AllHomes.csv")
+
+    hd["State"].replace(states, inplace=True)
+
     hd.set_index(["State","RegionName"], inplace=True)
 
     hd = hd.loc[:,"2000-01":"2016-08"]
