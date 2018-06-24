@@ -32,13 +32,14 @@ from scipy.stats import ttest_ind
 # 
 # Each function in this assignment below is worth 10%, with the exception of ```run_ttest()```, which is worth 50%.
 
-# In[ ]:
+# In[3]:
 
 # Use this dictionary to map state names to two letter acronyms
 states = {'OH': 'Ohio', 'KY': 'Kentucky', 'AS': 'American Samoa', 'NV': 'Nevada', 'WY': 'Wyoming', 'NA': 'National', 'AL': 'Alabama', 'MD': 'Maryland', 'AK': 'Alaska', 'UT': 'Utah', 'OR': 'Oregon', 'MT': 'Montana', 'IL': 'Illinois', 'TN': 'Tennessee', 'DC': 'District of Columbia', 'VT': 'Vermont', 'ID': 'Idaho', 'AR': 'Arkansas', 'ME': 'Maine', 'WA': 'Washington', 'HI': 'Hawaii', 'WI': 'Wisconsin', 'MI': 'Michigan', 'IN': 'Indiana', 'NJ': 'New Jersey', 'AZ': 'Arizona', 'GU': 'Guam', 'MS': 'Mississippi', 'PR': 'Puerto Rico', 'NC': 'North Carolina', 'TX': 'Texas', 'SD': 'South Dakota', 'MP': 'Northern Mariana Islands', 'IA': 'Iowa', 'MO': 'Missouri', 'CT': 'Connecticut', 'WV': 'West Virginia', 'SC': 'South Carolina', 'LA': 'Louisiana', 'KS': 'Kansas', 'NY': 'New York', 'NE': 'Nebraska', 'OK': 'Oklahoma', 'FL': 'Florida', 'CA': 'California', 'CO': 'Colorado', 'PA': 'Pennsylvania', 'DE': 'Delaware', 'NM': 'New Mexico', 'RI': 'Rhode Island', 'MN': 'Minnesota', 'VI': 'Virgin Islands', 'NH': 'New Hampshire', 'MA': 'Massachusetts', 'GA': 'Georgia', 'ND': 'North Dakota', 'VA': 'Virginia'}
 
 
-# In[ ]:
+# In[2]:
+
 
 def get_list_of_university_towns():
     '''Returns a DataFrame of towns and the states they are in from the 
@@ -52,51 +53,118 @@ def get_list_of_university_towns():
     2. For "RegionName", when applicable, removing every character from " (" to the end.
     3. Depending on how you read the data, you may need to remove newline character '\n'. '''
     
-    return "ANSWER"
+    with open("university_towns.txt", "r") as f:
+        data = f.readlines()        
+        content =[]        
+        for line in data:
+            if "[edit]" in line:
+                state = line.split("[")[0].replace("\n","").strip()
+            else:
+                item = [state, line.split("(")[0].replace("\n","").strip()]
+                content.append(item)    
+    df = pd.DataFrame(content, columns=["State", "RegionName"])    
+    return df
+
+get_list_of_university_towns()
 
 
-# In[ ]:
+# In[2]:
 
-def get_recession_start():
+def get_recession_start():    
     '''Returns the year and quarter of the recession start time as a 
     string value in a format such as 2005q3'''
+    gdp = pd.ExcelFile('gdplev.xls')
+    gdp = gdp.parse("Sheet1")
+    gdp.rename(columns={"Unnamed: 4": 'Quarter', "Unnamed: 5":'GDP'}, inplace=True)
+    gdp = gdp[["Quarter", "GDP"]]
+    gdp = gdp.iloc[gdp.index[gdp["Quarter"]=="1999q4"][0]:]
     
-    return "ANSWER"
+    for i in range(2, len(gdp)):
+        if (gdp.iloc[i-2][1] > gdp.iloc[i-1][1]) and (gdp.iloc[i-1][1] > gdp.iloc[i][1]):
+            return gdp.iloc[i-2][0]
+
+get_recession_start()
 
 
-# In[ ]:
+# In[3]:
 
 def get_recession_end():
     '''Returns the year and quarter of the recession end time as a 
-    string value in a format such as 2005q3'''
-       
-    return "ANSWER"
+    string value in a format such as 2005q3'''    
+    gdp = pd.ExcelFile('gdplev.xls')
+    gdp = gdp.parse("Sheet1")
+    gdp.rename(columns={"Unnamed: 4": 'Quarter', "Unnamed: 5":'GDP'}, inplace=True)
+    gdp = gdp[["Quarter", "GDP"]]
+    gdp = gdp.iloc[gdp.index[gdp["Quarter"]=="1999q4"][0]:]
+    
+    start = get_recession_start()    
+    start_index = gdp[gdp['Quarter'] == start].index.tolist()[0]
+    
+    gdp = gdp.iloc[gdp.index.get_loc(start_index):]
+    
+    for i in range(2, len(gdp)):
+        if (gdp.iloc[i-2][1] < gdp.iloc[i-1][1]) and (gdp.iloc[i-1][1] < gdp.iloc[i][1]):
+            return gdp.iloc[i][0]
+        
+get_recession_end()
 
 
-# In[ ]:
+# In[12]:
 
 def get_recession_bottom():
     '''Returns the year and quarter of the recession bottom time as a 
-    string value in a format such as 2005q3'''
+    string value in a format such as 2005q3'''    
+    gdp = pd.ExcelFile('gdplev.xls')
+    gdp = gdp.parse("Sheet1")
+    gdp.rename(columns={"Unnamed: 4": 'Quarter', "Unnamed: 5":'GDP'}, inplace=True)
+    gdp = gdp[["Quarter", "GDP"]]
+    gdp = gdp.iloc[gdp.index[gdp["Quarter"]=="1999q4"][0]:]
     
-    return "ANSWER"
+    start_recession = get_recession_start()
+    end_recession = get_recession_end()
+    start_index = gdp[gdp['Quarter'] == start_recession].index.tolist()[0]
+    end_index = gdp[gdp['Quarter'] == end_recession].index.tolist()[0]
+    
+    lowest_index = gdp.iloc[gdp.index.get_loc(start_index):gdp.index.get_loc(end_index)]["GDP"].idxmin()
+    
+    return gdp.iloc[gdp.index.get_loc(lowest_index)].Quarter
+
+get_recession_bottom()
 
 
 # In[ ]:
 
+def get_quarter(quarter):
+    if quarter <= 3:
+        return "q1"
+    elif quarter > 3 and quarter <= 6:
+        return "q2"
+    elif quarter > 6 and quarter <= 9:
+        return "q3"
+    elif quarter > 9 and quarter <= 12:
+        return "q4"
+
 def convert_housing_data_to_quarters():
-    '''Converts the housing data to quarters and returns it as mean 
+    '''Converts the housing data to quarters and returns it as mean
     values in a dataframe. This dataframe should be a dataframe with
     columns for 2000q1 through 2016q3, and should have a multi-index
     in the shape of ["State","RegionName"].
-    
+
     Note: Quarters are defined in the assignment description, they are
     not arbitrary three month periods.
-    
+
     The resulting dataframe should have 67 columns, and 10,730 rows.
     '''
-    
-    return "ANSWER"
+    hd = pd.read_csv("City_Zhvi_AllHomes.csv")
+    hd.set_index(["State","RegionName"], inplace=True)
+
+    hd = hd.loc[:,"2000-01":"2016-08"]
+
+    hd.rename(columns={y:(y.split("-")[0]+get_quarter(int(y.split("-")[1]))) for y in hd.columns}, inplace=True)
+
+    return hd.groupby(by=hd.columns, axis=1).mean()
+
+convert_housing_data_to_quarters()
 
 
 # In[ ]:
