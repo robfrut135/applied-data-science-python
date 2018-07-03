@@ -25,6 +25,8 @@ temp_max_15 = df[(df['Element'] == 'TMAX') & (df['Year'] == '2015')].groupby('Mo
 broken_min = np.where(temp_min_15['Data_Value'] < df_min['Data_Value'])[0]
 broken_max = np.where(temp_max_15['Data_Value'] > df_max['Data_Value'])[0]
 
+plt.rcParams.update({'font.size': 8})
+
 plt.figure()
 plt.plot(df_max.values, ".-", color="orange")
 plt.plot(df_min.values, ".c-")
@@ -33,11 +35,13 @@ plt.scatter(broken_min, temp_min_15.iloc[broken_min], s = 10, c = 'b')
 plt.xlabel('Day of the year')
 plt.ylabel('Temperature (Tenths of Degrees C)')
 plt.title('Daily climate records')
-plt.legend(['record max', 'record min','broken high', 'broken low'], loc=1,bbox_to_anchor=(1.1, 1.2))
+plt.legend(['2005-2014 record max', '2005-2014 record min','2015 broken high', '2015 broken low'], loc=1,bbox_to_anchor=(1.1, 1.15))
 plt.xticks(range(0, len(df_min), 20), df_min.index[range(0, len(df_min), 20)], rotation = '45')
 plt.subplots_adjust(bottom=0.25)
 plt.gca().spines['top'].set_visible(False)
 plt.gca().spines['right'].set_visible(False)
 plt.gca().fill_between(range(len(df_min)), df_min["Data_Value"], df_max["Data_Value"], facecolor = 'lightcyan', alpha = 0.5)
 plt.show()
+
+
 
