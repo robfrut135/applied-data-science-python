@@ -39,22 +39,33 @@ axis_unif = [13,21,0,20]
 axis_dist =[axis_normal, axis_gamma, axis_exp, axis_unif]
 
 xs = [x1,x2,x3,x4]
+xs_titles = ["Normal", "Gamma", "Exponencial", "Uniform"]
+xs_colors = ["red", "blue", "orange", "purple"]
 
 def update(curr):
     if curr == n:
         a.event_source.stop()
+
     bins_normal = np.arange(-6, 2, 0.8)
     bins_gamma = np.arange(0, 30, 3)
     bins_exp = np.arange(0, 10, 0.5)
     bins_unif = np.arange(14, 20, 0.6)
     bin_sample = [bins_normal, bins_gamma, bins_exp, bins_unif]
+
     for i in range(0, len(axs)):
         axs[i].cla()
-        axs[i].hist(xs[i][:curr], bins = bin_sample[i])
+        axs[i].hist(xs[i][:curr], bins = bin_sample[i], color=xs_colors[i])
         axs[i].axis(axis_dist[i])
+        axs[i].set_title(xs_titles[i], fontsize=11)
+        axs[i].set_ylabel('Frequency', fontsize=9)
+        axs[i].set_xlabel('Value', fontsize=9)
 
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+fig.set_size_inches(8, 8, forward=True)
+plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+
 axs = [ax1,ax2,ax3,ax4]
-a = animation.FuncAnimation(fig, update, interval=5)
+
+a = animation.FuncAnimation(fig, update, interval=100)
 
 
