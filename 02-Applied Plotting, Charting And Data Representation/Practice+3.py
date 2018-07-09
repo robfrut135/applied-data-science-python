@@ -30,12 +30,12 @@ n = 1000
 x1 = np.random.normal(-2.5, 1, n)
 x2 = np.random.gamma(2, 1.5, n)
 x3 = np.random.exponential(2, n)
-x4 = np.random.uniform(14,20, n)
+x4 = np.random.uniform(14, 20, n)
 
-axis_normal = [-6,1,0,50]
-axis_gamma = [-1,15,0,70]
-axis_exp = [-1,15,0,70]
-axis_unif = [13,21,0,20]
+axis_normal = [-6, 1, 0, 50]
+axis_gamma = [-1, 15, 0, 70]
+axis_exp = [-1, 15, 0, 70]
+axis_unif = [13, 21, 0, 20]
 axis_dist =[axis_normal, axis_gamma, axis_exp, axis_unif]
 
 xs = [x1,x2,x3,x4]
@@ -46,15 +46,15 @@ def update(curr):
     if curr == n:
         a.event_source.stop()
 
-    bins_normal = np.arange(-6, 2, 0.8)
-    bins_gamma = np.arange(0, 30, 3)
-    bins_exp = np.arange(0, 10, 0.5)
-    bins_unif = np.arange(14, 20, 0.6)
-    bin_sample = [bins_normal, bins_gamma, bins_exp, bins_unif]
+    normal = np.arange(-6, 2, 0.8)
+    gamma = np.arange(0, 30, 3)
+    exponencial = np.arange(0, 10, 0.5)
+    uniform = np.arange(14, 20, 0.6)
+    bin_sample = [normal, gamma, exponencial, uniform]
 
     for i in range(0, len(axs)):
         axs[i].cla()
-        axs[i].hist(xs[i][:curr], bins = bin_sample[i], color=xs_colors[i])
+        axs[i].hist(xs[i][:curr], bins=bin_sample[i], color=xs_colors[i])
         axs[i].axis(axis_dist[i])
         axs[i].set_title(xs_titles[i], fontsize=11)
         axs[i].set_ylabel('Frequency', fontsize=9)
