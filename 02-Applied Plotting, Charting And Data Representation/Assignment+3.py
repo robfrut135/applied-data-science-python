@@ -46,16 +46,50 @@
 # In[ ]:
 
 # Use the following data for this assignment:
-
-# Use the following data for this assignment:
 %matplotlib notebook
 
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.colors as mcol
+from scipy import stats
+
+
+def print_plot(threshold):
+    # Line
+    ax.axhline(threshold, color="gray")
+    ax.text(1.02, threshold, threshold, va='center', ha="left", bbox=dict(facecolor="w",alpha=0.5), transform=ax.get_yaxis_transform())
+
+    # Graph
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(years)
+    ax.yaxis.grid(False)
+    ax.xaxis.grid(False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    ax.set_facecolor('white')
+
+    # Colors
+    percentages = []
+    for bar, yerr_ in zip(bars, yerr):
+        low = bar.get_height() - yerr_
+        high = bar.get_height() + yerr_
+        percentage = (high-threshold)/(high-low)
+        if percentage>1: percentage=1
+        if percentage<0: percentage=0
+        percentages.append(percentage)
+
+    cpick.to_rgba(percentages)
+    plt.bar(range(df.shape[0]), means, yerr=yerr, color=cpick.to_rgba(percentages))
+
+
+def onclick(event):
+    plt.cla()
+    print_plot(event.ydata)
+
 
 np.random.seed(12345)
 
@@ -67,39 +101,41 @@ df = pd.DataFrame([np.random.normal(32000,200000,3650),
 
 # width of the bars
 barWidth = 1
+default_threshold = 42000
+lines_width = 0.9
 
-# Choose the height of the blue bars
-bars1 = df.T.mean().values
+years = ["1992","1993","1994","1995"]
+x_pos = np.arange(len(years))
+means = df.mean(axis = 1)
+stds = df.std(axis = 1)
+yerr = (stds / np.sqrt(df.shape[1]) * stats.t.ppf(1-0.05/2, df.shape[1]-1))
 
-# The x position of bars
-r1 = np.arange(len(bars1))
+plt.rcParams["axes.edgecolor"] = "0.15"
+plt.rcParams["axes.linewidth"]  = lines_width
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-# Create bars
-N = 11
-cmap = plt.get_cmap('RdBu_r',N)
+# Bars
+bars = ax.bar(x_pos, means, yerr=yerr, align='center', alpha=lines_width, ecolor='black', capsize=10)
 
-norm = mpl.colors.Normalize(0,1)
+# Colors
+cm1 = mcol.LinearSegmentedColormap.from_list("CmapName",["blue", "white", "red"])
+cpick = cm.ScalarMappable(cmap=cm1)
+cpick.set_array([])
+plt.colorbar(cpick, orientation='horizontal')
+plt.xticks(range(df.shape[0]), df.index, alpha=lines_width)
 
-for index, value in enumerate(bars1):
-    plt.bar(index, value, width=barWidth, edgecolor='black', color=cmap(norm(value)))
+# Print plot
+print_plot(default_threshold)
 
-sm = plt.cm.ScalarMappable(cmap="RdBu_r", norm=norm)
-sm.set_array([])
-plt.colorbar(sm, ticks=np.linspace(0,1,N), orientation="horizontal")
+# Add onclick event
+plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
-ax.axhline(42000, color="gray")
-ax.text(1.02, 42000, "42000", va='center', ha="left", bbox=dict(facecolor="w",alpha=0.5), transform=ax.get_yaxis_transform())
-
-# general layout
-plt.rcParams.update({'font.size': 8})
-plt.xticks([r for r in range(len(bars1))], df.T.mean().index.values)
-plt.legend()
-
-# Show graphic
+# Save the figure and show
 plt.show()
+
+
 
 
 
