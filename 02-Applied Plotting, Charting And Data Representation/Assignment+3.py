@@ -59,7 +59,7 @@ from scipy import stats
 def print_plot(threshold):
     # Line
     ax.axhline(threshold, color="gray")
-    ax.text(1.02, threshold, threshold, va='center', ha="left", bbox=dict(facecolor="w",alpha=0.5), transform=ax.get_yaxis_transform())
+    ax.text(1.01, threshold, threshold, fontsize=8, va='center', ha="left", bbox=dict(facecolor="w",alpha=0.5), transform=ax.get_yaxis_transform())
 
     # Graph
     ax.set_xticks(x_pos)
@@ -102,7 +102,7 @@ df = pd.DataFrame([np.random.normal(32000,200000,3650),
 # width of the bars
 barWidth = 1
 default_threshold = 42000
-lines_width = 0.9
+lines_width = 0.95
 
 years = ["1992","1993","1994","1995"]
 x_pos = np.arange(len(years))
@@ -113,7 +113,7 @@ yerr = (stds / np.sqrt(df.shape[1]) * stats.t.ppf(1-0.05/2, df.shape[1]-1))
 plt.rcParams["axes.edgecolor"] = "0.15"
 plt.rcParams["axes.linewidth"]  = lines_width
 
-fig = plt.figure()
+fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(111)
 
 # Bars
@@ -133,9 +133,7 @@ print_plot(default_threshold)
 plt.gcf().canvas.mpl_connect('button_press_event', onclick)
 
 # Save the figure and show
+plt.tight_layout(rect=[0, 0, 0.85, 1])
 plt.show()
-
-
-
 
 
