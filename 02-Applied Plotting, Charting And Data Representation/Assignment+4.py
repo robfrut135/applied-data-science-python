@@ -41,5 +41,28 @@
 
 # In[ ]:
 
+import matplotlib.pyplot as plt
+import pandas as pd
+
+get_ipython().magic('matplotlib notebook')
+
+df_d = pd.read_csv("Assignment+4_DonaldTrump.csv")
+df_d = df_d.drop(["text","url","user","favorites"], axis=1)
+df_d = df_d.rename(columns={"replies":"Trump replies","retweets": "Trump retweets"})
+
+df_o = pd.read_csv("Assignment+4_BarackObama.csv")
+df_o = df_o.drop(["text","url","user","favorites"], axis=1)
+df_o = df_o.rename(columns={"replies":"Obama replies","retweets": "Obama retweets"})
+
+df = df_d.append(df_o)
+df["created_at"] = df["created_at"].map(lambda x: x.split(" ")[0])
+df = df.set_index("created_at")
+
+plot = df.plot(rot="45",fontsize=8)
+plot.set_xlabel('Tweet')
+plot.set_title("Obama vs Trump on Twitter")
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+plt.gca().invert_xaxis()
 
 
