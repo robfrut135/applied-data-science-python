@@ -15,7 +15,7 @@
 #  
 # The target is stored in the `class` column, where a value of 1 corresponds to an instance of fraud and 0 corresponds to an instance of not fraud.
 
-# In[1]:
+# In[3]:
 
 import numpy as np
 import pandas as pd
@@ -38,7 +38,7 @@ def answer_one():
 answer_one()
 
 
-# In[3]:
+# In[4]:
 
 # Use X_train, X_test, y_train, y_test for all of the following questions
 from sklearn.model_selection import train_test_split
@@ -223,21 +223,23 @@ answer_five()
 # 
 # *Note: do not return a DataFrame, just the values denoted by '?' above in a numpy array. You might need to reshape your raw result to meet the format we are looking for.*
 
-# In[ ]:
+# In[31]:
 
 def answer_six():    
     from sklearn.model_selection import GridSearchCV
     from sklearn.linear_model import LogisticRegression
 
-    # Your code here
-    parameters = {'gamma':[0.01, 0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}
-    clf = GridSearchCV(m,parameters,scoring='recall')
-    clf.fit(X_train,y_train)
-    y_pred = clf.best_estimator_.predict(X_test)
-    rec = recall_score(y_test, y_pred, average='binary')
-
+    # Your code here    
+    lr = LogisticRegression()    
     
-    return # Return your answer
+    clf = GridSearchCV(lr, param_grid = {'C':[0.01, 0.1, 1, 10, 100], 'penalty': ['l1','l2']}, scoring='recall')
+    clf.fit(X_train,y_train)
+    
+    mean_test_score_l1 = clf.cv_results_["mean_test_score"].reshape(5,2)
+    
+    return mean_test_score_l1
+
+answer_six()
 
 
 # In[ ]:
