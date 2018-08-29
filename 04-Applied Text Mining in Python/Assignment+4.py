@@ -25,79 +25,37 @@
 # 
 # *Do not modify the functions `convert_tag`, `document_path_similarity`, and `test_document_path_similarity`.*
 
-# In[ ]:
+# In[61]:
 
 import numpy as np
 import nltk
 from nltk.corpus import wordnet as wn
 import pandas as pd
 
-
-def convert_tag(tag):
-    """Convert the tag given by nltk.pos_tag to the tag used by wordnet.synsets"""
-    
+def convert_tag(tag):    
     tag_dict = {'N': 'n', 'J': 'a', 'R': 'r', 'V': 'v'}
     try:
         return tag_dict[tag[0]]
     except KeyError:
         return None
 
-
 def doc_to_synsets(doc):
-    """
-    Returns a list of synsets in document.
-
-    Tokenizes and tags the words in the document doc.
-    Then finds the first synset for each word/tag combination.
-    If a synset is not found for that combination it is skipped.
-
-    Args:
-        doc: string to be converted
-
-    Returns:
-        list of synsets
-
-    Example:
-        doc_to_synsets('Fish are nvqjp friends.')
-        Out: [Synset('fish.n.01'), Synset('be.v.01'), Synset('friend.n.01')]
-    """
-    
-
-    # Your Code Here
-    
-    return # Your Answer Here
-
+    tokens = nltk.word_tokenize(doc)
+    pos = nltk.pos_tag(tokens)    
+    tags = [tag[1] for tag in pos]
+    wn_tag = [convert_tag(tag) for tag in tags]     
+    sets = [wn.synsets(x,y) for x,y in list(zip(tokens,wn_tag))]        
+    return [val[0] for val in sets if len(val) > 0]
 
 def similarity_score(s1, s2):
-    """
-    Calculate the normalized similarity score of s1 onto s2
-
-    For each synset in s1, finds the synset in s2 with the largest similarity value.
-    Sum of all of the largest similarity values and normalize this value by dividing it by the
-    number of largest similarity values found.
-
-    Args:
-        s1, s2: list of synsets from doc_to_synsets
-
-    Returns:
-        normalized similarity score of s1 onto s2
-
-    Example:
-        synsets1 = doc_to_synsets('I like cats')
-        synsets2 = doc_to_synsets('I like dogs')
-        similarity_score(synsets1, synsets2)
-        Out: 0.73333333333333339
-    """
-    
-    
-    # Your Code Here
-    
-    return # Your Answer Here
-
+    max_ps =[]
+    for synset1 in s1:        
+        scores = [x for x in [synset1.path_similarity(synset2) for synset2 in s2] if x is not None]
+        if scores:
+            max_ps.append(max(scores))
+    return sum(max_ps)/len(max_ps)
 
 def document_path_similarity(doc1, doc2):
-    """Finds the symmetrical similarity between doc1 and doc2"""
-
     synsets1 = doc_to_synsets(doc1)
     synsets2 = doc_to_synsets(doc2)
 
@@ -110,12 +68,14 @@ def document_path_similarity(doc1, doc2):
 # 
 # *This function should return the similarity score as a float.*
 
-# In[ ]:
+# In[62]:
 
 def test_document_path_similarity():
     doc1 = 'This is a function to test document_path_similarity.'
     doc2 = 'Use this function to see if your code in doc_to_synsets     and similarity_score is correct!'
     return document_path_similarity(doc1, doc2)
+
+test_document_path_similarity()
 
 
 # <br>
@@ -124,7 +84,7 @@ def test_document_path_similarity():
 # 
 # `Quality` is an indicator variable which indicates if the two documents `D1` and `D2` are paraphrases of one another (1 for paraphrase, 0 for not paraphrase).
 
-# In[ ]:
+# In[34]:
 
 # Use this dataframe for questions most_similar_docs and label_accuracy
 paraphrases = pd.read_csv('paraphrases.csv')
@@ -139,13 +99,21 @@ paraphrases.head()
 # 
 # *This function should return a tuple `(D1, D2, similarity_score)`*
 
-# In[ ]:
+# In[35]:
 
 def most_similar_docs():
     
-    # Your Code Here
+    def func(x):
+        try:
+            return document_path_similarity(x['D1'], x['D2'])
+        except:
+            return np.nan
+
+    paraphrases['similarity_score'] = paraphrases.apply(func, axis=1)
+    paraphrases.dropna(inplace=True)
+    paraphrases.sort_values(by="similarity_score", inplace=True, ascending=False)
     
-    return # Your Answer Here
+    return tuple(paraphrases.head(1)[["D1","D2","similarity_score"]].values[0])
 
 
 # ### label_accuracy
@@ -154,21 +122,31 @@ def most_similar_docs():
 # 
 # *This function should return a float.*
 
-# In[ ]:
+# In[36]:
 
 def label_accuracy():
     from sklearn.metrics import accuracy_score
 
-    # Your Code Here
+    def func(x):
+        try:
+            return document_path_similarity(x['D1'], x['D2'])
+        except:
+            return np.nan
+
+    paraphrases['similarity_score'] = paraphrases.apply(func, axis=1)
+    paraphrases.dropna(inplace=True)
+    paraphrases.sort_values(by="similarity_score", inplace=True, ascending=False)
     
-    return # Your Answer Here
+    paraphrases['classifier'] = paraphrases["similarity_score"].apply(lambda x: 1 if x>0.75 else 0)
+    
+    return accuracy_score(paraphrases['Quality'], paraphrases['classifier'])
 
 
 # ## Part 2 - Topic Modelling
 # 
 # For the second part of this assignment, you will use Gensim's LDA (Latent Dirichlet Allocation) model to model topics in `newsgroup_data`. You will first need to finish the code in the cell below by using gensim.models.ldamodel.LdaModel constructor to estimate LDA model parameters on the corpus, and save to the variable `ldamodel`. Extract 10 topics using `corpus` and `id_map`, and with `passes=25` and `random_state=34`.
 
-# In[ ]:
+# In[37]:
 
 import pickle
 import gensim
@@ -193,13 +171,13 @@ corpus = gensim.matutils.Sparse2Corpus(X, documents_columns=False)
 id_map = dict((v, k) for k, v in vect.vocabulary_.items())
 
 
-# In[ ]:
+# In[64]:
 
 # Use the gensim.models.ldamodel.LdaModel constructor to estimate 
 # LDA model parameters on the corpus, and save to the variable `ldamodel`
 
 # Your code here:
-#ldamodel = 
+ldamodel = gensim.models.ldamodel.LdaModel(corpus, id2word=id_map, num_topics=10, passes=25, random_state=34)
 
 
 # ### lda_topics
@@ -212,13 +190,13 @@ id_map = dict((v, k) for k, v in vect.vocabulary_.items())
 # 
 # *This function should return a list of tuples.*
 
-# In[ ]:
+# In[65]:
 
 def lda_topics():
     
-    # Your Code Here
-    
-    return # Your Answer Here
+    return ldamodel.print_topics(num_topics=10, num_words=10)
+
+lda_topics()
 
 
 # ### topic_distribution
@@ -227,18 +205,20 @@ def lda_topics():
 # 
 # *This function should return a list of tuples, where each tuple is `(#topic, probability)`*
 
-# In[ ]:
+# In[40]:
 
 new_doc = ["\n\nIt's my understanding that the freezing will start to occur because of the\ngrowing distance of Pluto and Charon from the Sun, due to it's\nelliptical orbit. It is not due to shadowing effects. \n\n\nPluto can shadow Charon, and vice-versa.\n\nGeorge Krumins\n-- "]
 
 
-# In[ ]:
+# In[70]:
 
 def topic_distribution():
     
-    # Your Code Here
+    # Fit and transform
+    X_new_doc = vect.transform(new_doc)
+    corpus_new_doc = gensim.matutils.Sparse2Corpus(X_new_doc, documents_columns=False)
     
-    return # Your Answer Here
+    return list(ldamodel[corpus_new_doc])[0]
 
 
 # ### topic_names
@@ -249,11 +229,12 @@ def topic_distribution():
 # 
 # *This function should return a list of 10 strings.*
 
-# In[ ]:
+# In[42]:
 
 def topic_names():
     
-    # Your Code Here
+    strings = ['Computers & IT', 'Automobiles', 'Computers & IT', 'Religion', 'Automobiles', 'Sports',
+             'Education', 'Religion', 'Computers & IT', 'Science']
     
-    return # Your Answer Here
+    return strings
 
