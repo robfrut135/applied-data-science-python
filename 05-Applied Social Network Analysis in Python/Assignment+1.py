@@ -145,16 +145,29 @@ def answer_three():
 # 
 # *This function should return a float.*
 
-# In[73]:
+# In[123]:
 
 def answer_four():
-        
-    df_c = pd.read_csv('Employee_Movie_Choices.txt', sep='\t', names=['Employee', 'Movie'])[1:]
+            
     df_r = pd.read_csv('Employee_Relationships.txt', sep='\t', names=['EmployeeA', 'EmployeeB', 'Score'])
+    df_r.set_index(['EmployeeA', 'EmployeeB'], inplace=True)
     
     G = answer_three()
-            
-    return G
+    
+    df_s_ini = pd.DataFrame(G.edges(data=True), columns=["EmployeeA","EmployeeB","Weight"])
+    df_s_ini['Weight'] = df_s_ini['Weight'].map(lambda x: x['weight'])
 
-#answer_four().edges(data=True)
+    df_s_copy = df_s_ini.copy()
+    df_s_copy.rename(columns={"EmployeeA":"A", "EmployeeB":"EmployeeA"}, inplace=True)
+    df_s_copy.rename(columns={"A":"EmployeeB"}, inplace=True)    
+    
+    df_s = pd.concat([df_s_ini, df_s_copy])
+    df_s.set_index(['EmployeeA', 'EmployeeB'], inplace=True)    
+    
+    df = pd.merge(df_r, df_s, how='left',left_index=True, right_index=True)
+    df["Weight"].fillna(value=0, inplace=True)
+    
+    return df['Weight'].corr(df['Score'])
+
+#answer_four()
 
