@@ -17,7 +17,7 @@
 # 
 # Both files are tab delimited.
 
-# In[ ]:
+# In[1]:
 
 import networkx as nx
 import pandas as pd
@@ -79,13 +79,20 @@ def plot_graph(G, weight_name=None):
 # 
 # *This function should return a networkx graph with 19 nodes and 24 edges*
 
-# In[ ]:
+# In[52]:
 
 def answer_one():
         
-    # Your Code Here
+    df = pd.read_csv('Employee_Movie_Choices.txt', sep='\t', names=['Employee', 'Movie'])[1:]
+
+    G = nx.Graph()
+    G.add_nodes_from(list(df["Employee"].unique()), bipartite=0) #label one
+    G.add_nodes_from(list(df["Movie"].unique()), bipartite=1)
+    G.add_edges_from([tuple(x) for x in df.to_records(index=False)])
     
-    return # Your Answer Here
+    return G
+
+#plot_graph(answer_one())
 
 
 # ### Question 2
@@ -94,13 +101,19 @@ def answer_one():
 # 
 # *This function should return a networkx graph with node attributes `{'type': 'movie'}` or `{'type': 'employee'}`*
 
-# In[ ]:
+# In[61]:
 
 def answer_two():
+    df = pd.read_csv('Employee_Movie_Choices.txt', sep='\t', names=['Employee', 'Movie'])[1:]
     
-    # Your Code Here
-    
-    return # Your Answer Here
+    G = nx.Graph()
+    G.add_nodes_from(list(df["Employee"].unique()), bipartite=0, type='movie') 
+    G.add_nodes_from(list(df["Movie"].unique()), bipartite=1, type='employee')
+    G.add_edges_from([tuple(x) for x in df.to_records(index=False)])
+        
+    return G
+
+#answer_two().nodes(data=True)
 
 
 # ### Question 3
@@ -109,13 +122,19 @@ def answer_two():
 # 
 # *This function should return a weighted projected graph.*
 
-# In[ ]:
+# In[66]:
 
 def answer_three():
-        
-    # Your Code Here
+    df = pd.read_csv('Employee_Movie_Choices.txt', sep='\t', names=['Employee', 'Movie'])[1:]    
     
-    return # Your Answer Here
+    G = answer_two()
+    
+    X = set(list(df["Employee"].unique()))
+    P = bipartite.weighted_projected_graph(G, X)
+    
+    return P
+
+#plot_graph(answer_three())
 
 
 # ### Question 4
@@ -126,11 +145,16 @@ def answer_three():
 # 
 # *This function should return a float.*
 
-# In[ ]:
+# In[73]:
 
 def answer_four():
         
-    # Your Code Here
+    df_c = pd.read_csv('Employee_Movie_Choices.txt', sep='\t', names=['Employee', 'Movie'])[1:]
+    df_r = pd.read_csv('Employee_Relationships.txt', sep='\t', names=['EmployeeA', 'EmployeeB', 'Score'])
     
-    return # Your Answer Here
+    G = answer_three()
+            
+    return G
+
+#answer_four().edges(data=True)
 
