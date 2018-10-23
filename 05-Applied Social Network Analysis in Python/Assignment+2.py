@@ -12,7 +12,7 @@
 # In this assignment you will go through the process of importing and analyzing an internal email communication network between employees of a mid-sized manufacturing company. 
 # Each node represents an employee and each directed edge between two nodes represents an individual email. The left node represents the sender and the right node represents the recipient.
 
-# In[5]:
+# In[1]:
 
 import networkx as nx
 
@@ -26,7 +26,7 @@ import networkx as nx
 # 
 # *This function should return a directed multigraph networkx graph.*
 
-# In[3]:
+# In[2]:
 
 def answer_one():
     G = nx.read_edgelist('email_network.txt', nodetype=str, comments="#", delimiter="\t", 
@@ -108,7 +108,7 @@ def answer_five():
 # 
 # *This function should return a networkx MultiDiGraph named G_sc.*
 
-# In[17]:
+# In[3]:
 
 def answer_six():
     G = answer_one()        
@@ -171,7 +171,7 @@ def answer_nine():
 # 
 # *This function should return a set of the node(s).*
 
-# In[26]:
+# In[11]:
 
 def answer_ten():
     G = answer_six()
@@ -193,7 +193,7 @@ def answer_ten():
 # 
 # *This function should return a tuple (name of node, number of satisfied connected nodes).*
 
-# In[31]:
+# In[6]:
 
 def answer_eleven():
     G = answer_six()
@@ -216,12 +216,12 @@ def answer_eleven():
 # 
 # *This function should return an integer.*
 
-# In[35]:
+# In[13]:
 
 def answer_twelve():        
     G = answer_six()
     
-    return nx.node_connectivity(G, list(answer_eleven())[0], list(answer_ten())[0])
+    return len(nx.minimum_node_cut(G, list(answer_ten())[0], answer_eleven()[0]))
 
 
 # ### Question 13
